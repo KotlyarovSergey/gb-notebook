@@ -65,15 +65,24 @@ public class UserRepository implements GBRepository {
             editUser.setFirstName(editUser.getFirstName());
         }
 
-        editUser.setLastName(update.getLastName());
-        editUser.setPhone(update.getPhone());
+        editUser.setLastName(update.getLastName().isEmpty() ? editUser.getLastName() : update.getLastName());
+        editUser.setPhone(update.getPhone().isEmpty() ? editUser.getPhone() : update.getPhone());
+
         write(users);
         return Optional.of(update);
     }
 
     @Override
     public boolean delete(Long id) {
-        return false;
+        List<User> users = findAll();
+        User delUser = users.stream()
+                .filter(u -> u.getId()
+                        .equals(id))
+                .findFirst().orElseThrow(() -> new RuntimeException("User not found"));
+
+        users.remove(delUser);
+        write(users);
+        return true;
     }
 
     private void write(List<User> users) {
@@ -82,6 +91,10 @@ public class UserRepository implements GBRepository {
             lines.add(mapper.toInput(u));
         }
         operation.saveAll(lines);
+    }
+
+    public User createUser(String firstName, String lastName, String phone) {
+        return new User(firstName, lastName, phone);
     }
 
 }

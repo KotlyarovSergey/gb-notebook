@@ -14,9 +14,8 @@ public class Main {
         createDB();
         FileOperation fileOperation = new FileOperation(DB_PATH);
         GBRepository repository = new UserRepository(fileOperation);
-        UserController controller = new UserController(repository);
-        UserView view = new UserView(controller);
-        view.run();
-
+        UserView view = new UserView();
+        UserController controller = new UserController(repository, view);
+        controller.run();
     }
 }
