@@ -29,7 +29,7 @@ public class UserController {
                 com = Commands.UNKNOWN;
             }
 
-            if (com == Commands.EXIT) return;
+            if (com == Commands.EXIT) break;
             switch (com) {
                 case SHOW_LIST:
                     List<User> users = readAll();
@@ -58,9 +58,15 @@ public class UserController {
                 case UNKNOWN:
                     view.showMessage("Команда не распознана! Повторите.");
                     break;
+                case SAVE:
+                    repository.save();
+                    break;
             }
         }
+
+        repository.save();
     }
+
 
 
     private User createUser() {

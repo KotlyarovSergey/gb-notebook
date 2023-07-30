@@ -10,23 +10,34 @@ import java.util.List;
 import java.util.Optional;
 
 public class UserRepository implements GBRepository {
+    private List<User> cachedUsers;
+    private boolean hasChanged;
     private final UserMapper mapper;
     private final String fileName;
         public UserRepository(String fileName) {
         this.fileName = fileName;
         this.mapper = new UserMapper();
+        cachedUsers = readUsers();
+        hasChanged = false;
     }
 
     @Override
     public List<User> findAll() {
-        List<String> lines = readAll();
-                List<User> users = new ArrayList<>();
+        return cachedUsers;
+    }
+
+    private List<User> readUsers(){
+        List<String> lines = readAllLines();
+        List<User> users = new ArrayList<>();
         for (String line : lines) {
             users.add(mapper.toOutput(line));
         }
         return users;
-    }
-    private List<String> readAll() {
+    };
+
+
+
+    private List<String> readAllLines() {
         List<String> lines = new ArrayList<>();
         try {
             File file = new File(fileName);
@@ -53,10 +64,11 @@ public class UserRepository implements GBRepository {
         return lines;
     }
     @Override
-    public User create(User user) {
-        List<User> users = findAll();
+
+      public User create(User user) {
+
         long max = 0L;
-        for (User u : users) {
+        for (User u : cachedUsers) {
             long id = u.getId();
             if (max < id){
                 max = id;
@@ -64,8 +76,8 @@ public class UserRepository implements GBRepository {
         }
         long next = max + 1;
         user.setId(next);
-        users.add(user);
-        write(users);
+        cachedUsers.add(user);
+        this.hasChanged = true;
         return user;
     }
 
@@ -91,7 +103,7 @@ public class UserRepository implements GBRepository {
         editUser.setLastName(update.getLastName().isEmpty() ? editUser.getLastName() : update.getLastName());
         editUser.setPhone(update.getPhone().isEmpty() ? editUser.getPhone() : update.getPhone());
 
-        write(users);
+        hasChanged = true;
         return Optional.of(update);
     }
 
@@ -104,13 +116,20 @@ public class UserRepository implements GBRepository {
                 .findFirst().orElseThrow(() -> new RuntimeException("User not found"));
 
         users.remove(delUser);
-        write(users);
+        hasChanged = true;
         return true;
     }
 
-    private void write(List<User> users) {
+    @Override
+    public void save() {
+        // System.out.println("hasChanged = " + hasChanged);
+        if(this.hasChanged) write();
+        this.hasChanged = false;
+    }
+
+        private void write() {
         List<String> lines = new ArrayList<>();
-        for (User u: users) {
+        for (User u: cachedUsers) {
             lines.add(mapper.toInput(u));
         }
         saveAll(lines);
@@ -132,6 +151,10 @@ public class UserRepository implements GBRepository {
 
     public User createUser(String firstName, String lastName, String phone) {
         return new User(firstName, lastName, phone);
+    }
+
+    public boolean isHasChanged() {
+        return hasChanged;
     }
 
 }

@@ -8,5 +8,6 @@ public enum Commands {
     SHOW_LIST,
     DELETE,
     EXIT,
-    UNKNOWN
+    UNKNOWN,
+    SAVE
 }
