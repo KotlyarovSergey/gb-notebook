@@ -45,8 +45,6 @@ public class UserController {
                     try {
                         User user = readUser(Long.parseLong(id));
                         view.showMessage(user.toString());
-//                        System.out.println(user);
-//                        System.out.println();
                     } catch (Exception e) {
                         throw new RuntimeException(e);
                     }
