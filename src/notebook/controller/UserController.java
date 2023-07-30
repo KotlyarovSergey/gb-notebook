@@ -34,7 +34,6 @@ public class UserController {
                 case SHOW_LIST:
                     List<User> users = readAll();
                     view.showMessage(users.toString());
-//                    System.out.println(users);
                     break;
                 case CREATE:
                     User u = createUser();
@@ -54,8 +53,7 @@ public class UserController {
                     updateUser(userId, createUser());
                     break;
                 case DELETE:
-                    userId = view.prompt("Enter user id: ");
-                    deleteUser(userId);
+                    deleteUser(view.prompt("Enter user id: "));
                     break;
                 case UNKNOWN:
                     view.showMessage("Команда не распознана! Повторите.");
